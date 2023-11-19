@@ -9,7 +9,8 @@ import "../styles/HomePage.css";
 const Homepage = () => {
 
     const [view, setView] = useState("list");
-
+    const [isUpdating, setIsUpdating] = useState('');
+    const [updateItemText, setUpdateItemText] = useState('');
     // Pop Up Component
     const [show, setShow] = useState(false);
     const handleShow = () => {
@@ -46,44 +47,105 @@ const Homepage = () => {
         }
       };
 
-/*
-    // SHOW TASKS
-    const [listItems, setListItems] = useState([]);
-    useEffect(()=>{
-      const getItemsList = async () => {
-        try{
-          const res = await axios.get('http://localhost:5500/api/items')
-          setListItems(res.data);
-          console.log('render')
-        }catch(err){
+      //update
+      const updateItem = async (e, taskId) => {
+        e.preventDefault();
+        try {
+          const res = await axios.put(`http://localhost:5500/api/item/${taskId}`, {
+            item: updateItemText, 
+            date: newDateValue, 
+            notes: newNotesValue 
+          });
+          
+          const updatedTask = res.data; 
+      
+          const updatedListItems = listItems.map(task => {
+            if (task._id === taskId) {
+              return { ...task, ...updatedTask }; 
+            }
+            return task;
+          });
+      
+          setListItems(updatedListItems);
+          setUpdateItemText('');
+          setIsUpdating('');
+        } catch (err) {
           console.log(err);
         }
-      }
-      getItemsList()
-    },[]);
+      };
+      
+      const renderUpdateForm = (task) => (
+        <form
+  className="update-form"
+  style={{
+    display: 'flex',
+    flexDirection: 'column',
+    maxWidth: '300px', // Adjust the width as needed
+    margin: '0 auto' // Center the form horizontally
+  }}
+  onSubmit={(e) => updateItem(e, task._id)}
+>
+  <input
+    className='update-new-input'
+    style={{
+      marginBottom: '10px',
+      padding: '8px',
+      fontSize: '16px'
+    }}
+    type="text"
+    placeholder="New Item"
+    onChange={e => setUpdateItemText(e.target.value)}
+    value={updateItemText}
+  />
+  <input
+    className='update-new-input'
+    style={{
+      marginBottom: '10px',
+      padding: '8px',
+      fontSize: '16px'
+    }}
+    type="date"
+    placeholder="New Date"
+    onChange={e => setNewDateValue(e.target.value)}
+    value={newDateValue}
+  />
+  <textarea
+    className='update-new-input'
+    style={{
+      marginBottom: '10px',
+      padding: '8px',
+      fontSize: '16px',
+      resize: 'vertical',
+      minHeight: '100px' // Set minimum height
+    }}
+    placeholder="New Notes"
+    onChange={e => setNewNotesValue(e.target.value)}
+    value={newNotesValue}
+  ></textarea>
+  <button
+    className="update-new-btn"
+    style={{
+      padding: '10px 20px',
+      backgroundColor: '#3498db',
+      color: 'white',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      fontSize: '16px'
+    }}
+    type='submit'
+  >
+    Update
+  </button>
+</form>
+      );
+      
+      // State variables for new date and notes values
+      const [newDateValue, setNewDateValue] = useState('');
+      const [newNotesValue, setNewNotesValue] = useState('');
 
-    // Delete Task
-    const deleteItem = async (id) => {
-      try{
-        const res = await axios.delete(`http://localhost:5500/api/item/${id}`)
-        const newListItems = listItems.filter(task=> task._id !== id);
-        setListItems(newListItems);
-      }catch(err){
-        console.log(err);
-      }
-    }
 
-    const tasks = [
-        {
-            id: 1,
-            name: "Task 1",
-            description: "Description 1",
-            status: "pending",
-            priority: "high"
-        }
-    ];
 
-*/
 
 
     return (
@@ -202,8 +264,18 @@ const Homepage = () => {
                             </span>
                           </div>
                           <div>
+                            
+                            
+                            {isUpdating === task._id
+                            ? renderUpdateForm(task)
+                            : (
+                            <>
                             <button className="btn btn-primary me-2">View</button>
-                            <button className="btn btn-danger delete-item" onClick={()=>{deleteItem(task._id)}}>Delete</button>
+      <button className="btn btn-success me-2" onClick={() => setIsUpdating(task._id)}>Update</button>
+      <button className="btn btn-danger delete-item" onClick={() => deleteItem(task._id)}>Delete</button>
+    </>
+  )
+}
                           </div>
                         </div>
                       </div>

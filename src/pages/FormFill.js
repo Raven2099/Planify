@@ -14,7 +14,6 @@ export default function FormFill() {
   const [priority, setPriority] = useState(null); 
   const [completed, setCompleted] = useState(false);
   const [notesText, setNotesText] = useState('');
-  
   const [category, setCategory] = useState('');
   const [notification, setNotification] = useState(0);
   //add to db
