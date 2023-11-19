@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {  useState } from 'react';
 import styles from '../styles/InputBox.module.css';
 import axios from 'axios';
 
@@ -7,16 +7,16 @@ export default function FormFill() {
 
 
 
-
+  const userEmail = 'abc.xyz@google.com'
   const [itemText, setItemText] = useState('')
-  const [listItems, setListItems] = useState([]);
+  const  setListItems = useState([]);
   const [date, setDate] = useState(null);
   const [priority, setPriority] = useState(null); 
   const [completed, setCompleted] = useState(false);
   const [notesText, setNotesText] = useState('');
-
-
-
+  
+  const [category, setCategory] = useState('');
+  const [notification, setNotification] = useState(0);
   //add to db
   
   
@@ -26,13 +26,25 @@ export default function FormFill() {
       return;
     }
     try{
-      const res = await axios.post('http://localhost:5500/api/item', {item: itemText, priority: priority, completed: completed, date: date, notes: notesText});
+      const res = await axios.post('http://localhost:5500/api/item', {item: itemText,
+      priority: priority,
+      completed: completed,
+      date: date,
+      notes: notesText,
+      createdDate:date,
+      category: category,
+      notification: notification,
+      userEmail: userEmail
+    }
+    );
       setListItems(prev =>[...prev, res.data]);
       setItemText('');
       setPriority(null);
       setDate(null);
       setCompleted(false);
       setNotesText('');
+      setCategory('');
+      setNotification(0);
       
     }catch(err){
       console.log(err); 
@@ -42,31 +54,7 @@ export default function FormFill() {
   //fetch from db
 
 
-  useEffect(()=>{
-    const getItemsList = async () => {
-      try{
-        const res = await axios.get('http://localhost:5500/api/items')
-        setListItems(res.data);
-        console.log('render')
-      }catch(err){
-        console.log(err);
-      }
-    }
-    getItemsList()
-  },[]);
-
-
-// delete from dbbbb
-  const deleteItem = async (id) => {
-    try{
-      const res = await axios.delete(`http://localhost:5500/api/item/${id}`)
-      const newListItems = listItems.filter(item=> item._id !== id);
-      setListItems(newListItems);
-    }catch(err){
-      console.log(err);
-    }
-  }
-
+  
 
 //TASK ADD FORM HERE
 
@@ -82,7 +70,7 @@ export default function FormFill() {
         className={styles.inputbox}
         onChange={e => {setItemText(e.target.value)} } value={itemText} required />
         
-{/* ADD DATE LATER */}
+{/* Add Date */}
 <br>
 </br>
 <br/>
@@ -145,7 +133,16 @@ export default function FormFill() {
 
 {/* ADD CATEGORY */}
 
-
+<label>Add a Tag</label>
+        <select className={styles.textar}
+          onChange={(e) => setCategory(e.target.value)}
+          value={category}>
+            <option value='None' selected disabled hidden>Choose A Tag</option>
+            <option value='Work'>Work</option>
+            <option value='School'>School</option>
+            <option value='Extra'>Extra-Curricular</option>
+            <option value='Personal'>Personal</option>
+        </select>
 
 {/* DESCRIPTION */}
 <br/>
@@ -155,29 +152,27 @@ export default function FormFill() {
 onChange={e => {setNotesText(e.target.value)} } value={notesText}>
 </textarea>
 </div>
+
+{/* Noti */}
+<div style={{ display: 'flex', alignItems: 'right' }}>
+  <label style={{ fontSize: '20px', textAlign: 'right', paddingRight: '20px' }}>
+    Enable Push Notifications?
+  </label>
+  <label className="switch" style={{ marginTop: '2px' }}>
+    <input
+      type="checkbox"
+      checked={notification === 1}
+      onChange={(e) => setNotification(e.target.checked ? 1 : 0)}
+    />
+    <span className="slider"></span>
+  </label>
+</div>
+
 {/* Submit */}
 <br/>
 <br />
       <button type='submit' className={styles.save_button}>Save</button>
       </form>
-
-       {
-          listItems.map(item => (
-          <div className="todo-item">
-            {
-                <>
-                  <p className="item-content">{item.item}</p>
-                  <button className="update-item" >Update</button>
-                  <button className="delete-item" onClick={()=>{deleteItem(item._id)}}>Delete</button>
-
-                </>
-            }
-          </div>
-          ))
-      } 
-      <div className='todo-listItems'>
-
-      </div>
     </div>
   );
 }

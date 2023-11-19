@@ -7,6 +7,7 @@ import axios from 'axios';
 import "../styles/HomePage.css";
 
 const Homepage = () => {
+
     const [view, setView] = useState("list");
 
     // Pop Up Component
@@ -18,6 +19,34 @@ const Homepage = () => {
       setShow(false);
     };
 
+    //logged in user fetch tasks
+    const [listItems, setListItems] = useState([]);
+    const loggedInUserId = 'abc.xyz@google.com';
+    useEffect(() => {
+      const fetchUserTasks = async () => {
+        try {
+          const res = await axios.get(`http://localhost:5500/api/user/${loggedInUserId}/tasks`);
+          setListItems(res.data);
+        } catch (err) {
+          console.log(err);
+        }
+      };
+      fetchUserTasks();
+    }, [loggedInUserId]);
+
+// delete tasks
+
+      const deleteItem = async (id) => {
+        try {
+          await axios.delete(`http://localhost:5500/api/item/${id}`);
+          const updatedListItems = listItems.filter(task => task._id !== id);
+          setListItems(updatedListItems);
+        } catch (err) {
+          console.log(err);
+        }
+      };
+
+/*
     // SHOW TASKS
     const [listItems, setListItems] = useState([]);
     useEffect(()=>{
@@ -53,6 +82,9 @@ const Homepage = () => {
             priority: "high"
         }
     ];
+
+*/
+
 
     return (
         <>
